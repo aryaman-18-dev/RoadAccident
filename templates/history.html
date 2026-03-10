@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Prediction History | Accident Severity AI</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        color: white;
+        min-height: 100vh;
+        padding: 40px;
+      }
+
+      /* Branding */
+
+      .brand {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .brand h1 {
+        font-size: 32px;
+      }
+
+      .brand p {
+        opacity: 0.8;
+        margin-top: 5px;
+      }
+
+      /* Header */
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .nav-actions a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: 0.3s;
+      }
+
+      .nav-actions a:hover {
+        color: #00eaff;
+      }
+
+      /* Clear Button */
+
+      .clear-btn {
+        background: linear-gradient(135deg, #ff4b4b, #ff6b6b);
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      }
+
+      .clear-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+      }
+
+      /* Search */
+
+      .search-box {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .search-box input {
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: none;
+        width: 250px;
+        outline: none;
+      }
+
+      /* Table Card */
+
+      .table-card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      }
+
+      /* Table */
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 14px;
+        text-align: center;
+      }
+
+      th {
+        background: rgba(255, 255, 255, 0.2);
+        font-weight: 600;
+      }
+
+      tr:nth-child(even) {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      tr:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      /* Severity Colors */
+
+      .severity-low {
+        color: #00ff9c;
+        font-weight: bold;
+      }
+
+      .severity-medium {
+        color: #ffc107;
+        font-weight: bold;
+      }
+
+      .severity-high {
+        color: #ff4b4b;
+        font-weight: bold;
+      }
+
+      /* Footer */
+
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        opacity: 0.8;
+        font-size: 14px;
+      }
+
+      .empty {
+        padding: 20px;
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="brand">
+      <h1>🚦 Accident Severity AI</h1>
+      <p>Smart Prediction for Safer Roads</p>
+    </div>
+
+    <div class="header">
+      <h2>📊 Prediction History</h2>
+
+      <div class="nav-actions">
+        <a href="/"><i class="fa fa-home"></i> Home</a>
+
+        <a href="/dashboard"><i class="fa fa-chart-line"></i> Dashboard</a>
+
+        <form action="/clear_history" method="POST">
+          <button
+            class="clear-btn"
+            onclick="return confirm('Delete all prediction history?');"
+          >
+            🗑 Clear
+          </button>
+        </form>
+
+        <a href="/logout"><i class="fa fa-sign-out-alt"></i> Logout</a>
+      </div>
+    </div>
+
+    <div class="search-box">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="🔍 Search predictions..."
+      />
+    </div>
+
+    <div class="table-card">
+      <table id="historyTable">
+        <tr>
+          <th>#</th>
+          <th>Severity</th>
+          <th>Confidence</th>
+          <th>Day</th>
+          <th>Weather</th>
+        </tr>
+
+        {% if predictions %} {% for p in predictions %}
+
+        <tr>
+          <td>{{ loop.index }}</td>
+
+          <td
+            class="{% if 'fatal' in p.severity|lower %}severity-high {% elif 'serious' in p.severity|lower %}severity-medium {% else %}severity-low {% endif %}"
+          >
+            {{ p.severity }}
+          </td>
+
+          <td>{{ "%.2f"|format(p.confidence) }}%</td>
+
+          <td>{{ p.day }}</td>
+
+          <td>{{ p.weather }}</td>
+        </tr>
+
+        {% endfor %} {% else %}
+
+        <tr>
+          <td colspan="5" class="empty">No predictions found</td>
+        </tr>
+
+        {% endif %}
+      </table>
+    </div>
+
+    <div class="footer">© 2026 Accident Severity AI. All rights reserved.</div>
+
+    <script>
+      /* SEARCH FILTER */
+
+      const searchInput = document.getElementById("searchInput");
+      const table = document.getElementById("historyTable");
+
+      searchInput.addEventListener("keyup", function () {
+        let filter = searchInput.value.toLowerCase();
+        let rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) {
+          let text = rows[i].textContent.toLowerCase();
+
+          rows[i].style.display = text.includes(filter) ? "" : "none";
+        }
+      });
+    </script>
+  </body>
+</html>

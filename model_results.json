@@ -1,0 +1,14 @@
+{
+    "Logistic_Regression": {
+        "accuracy": 0.5305333333333333,
+        "weighted_f1": 0.6257204382386803
+    },
+    "Random_Forest": {
+        "accuracy": 0.8003333333333333,
+        "weighted_f1": 0.7928139467350803
+    },
+    "XGBoost": {
+        "accuracy": 0.83405,
+        "weighted_f1": 0.804297216802172
+    }
+}

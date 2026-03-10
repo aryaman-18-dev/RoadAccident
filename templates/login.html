@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Login | Accident Severity AI</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+      }
+
+      body {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        overflow: hidden;
+      }
+
+      /* Background animated circles */
+
+      body::before,
+      body::after {
+        content: "";
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #00c6ff, #0072ff);
+        opacity: 0.3;
+        filter: blur(120px);
+        animation: float 8s infinite alternate;
+      }
+
+      body::after {
+        background: linear-gradient(45deg, #ff512f, #dd2476);
+        top: 60%;
+        left: 60%;
+        animation-duration: 10s;
+      }
+
+      @keyframes float {
+        from {
+          transform: translateY(-40px);
+        }
+        to {
+          transform: translateY(40px);
+        }
+      }
+
+      /* Branding */
+
+      .brand {
+        position: absolute;
+        top: 40px;
+        text-align: center;
+        color: white;
+      }
+
+      .brand h1 {
+        font-size: 32px;
+        letter-spacing: 1px;
+      }
+
+      .brand p {
+        opacity: 0.8;
+        margin-top: 5px;
+      }
+
+      /* Glass Card */
+
+      .login-card {
+        width: 360px;
+        padding: 45px;
+
+        border-radius: 18px;
+
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(18px);
+
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+
+        color: white;
+
+        animation: fadeIn 1s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .login-card h2 {
+        text-align: center;
+        margin-bottom: 25px;
+      }
+
+      /* Input fields */
+
+      .input-box {
+        position: relative;
+        margin: 15px 0;
+      }
+
+      .input-box input {
+        width: 100%;
+        padding: 12px 40px;
+
+        border: none;
+        border-radius: 8px;
+
+        background: rgba(255, 255, 255, 0.15);
+
+        color: white;
+        outline: none;
+      }
+
+      .input-box i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0.8;
+      }
+
+      .input-box input::placeholder {
+        color: #ddd;
+      }
+
+      /* Button */
+
+      .login-btn {
+        width: 100%;
+        padding: 12px;
+        margin-top: 15px;
+
+        border: none;
+        border-radius: 8px;
+
+        background: linear-gradient(45deg, #00c6ff, #0072ff);
+        color: white;
+
+        font-size: 16px;
+        cursor: pointer;
+
+        transition: 0.3s;
+      }
+
+      .login-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      /* Register text */
+
+      .login-card p {
+        text-align: center;
+        margin-top: 18px;
+        font-size: 14px;
+      }
+
+      .login-card a {
+        color: #00eaff;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      /* Footer */
+
+      .footer {
+        position: absolute;
+        bottom: 20px;
+        color: white;
+        font-size: 13px;
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="brand">
+      <h1>🚦 Accident Severity AI</h1>
+      <p>Smart Prediction for Safer Roads</p>
+    </div>
+
+    <div class="login-card">
+      <h2>🔐 Login</h2>
+
+      <form method="POST" action="/login">
+        <div class="input-box">
+          <i class="fa fa-user"></i>
+          <input type="text" name="username" placeholder="Username" required />
+        </div>
+
+        <div class="input-box">
+          <i class="fa fa-lock"></i>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+          />
+        </div>
+
+        <button class="login-btn" type="submit">Login</button>
+      </form>
+
+      <p>Don't have an account? <a href="/register">Register</a></p>
+    </div>
+
+    <div class="footer">© 2026 Accident Severity AI</div>
+  </body>
+</html>

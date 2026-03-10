@@ -1,0 +1,373 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Admin Panel | Accident Severity AI</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        color: white;
+        min-height: 100vh;
+        padding: 40px;
+      }
+
+      /* NAVBAR */
+
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 35px;
+      }
+
+      .navbar a {
+        color: white;
+        text-decoration: none;
+        margin-left: 20px;
+        font-weight: 500;
+      }
+
+      .navbar a:hover {
+        color: #00eaff;
+      }
+
+      /* Branding */
+
+      .brand {
+        text-align: center;
+        margin-bottom: 35px;
+      }
+
+      .brand h1 {
+        font-size: 32px;
+      }
+
+      .brand p {
+        opacity: 0.8;
+        margin-top: 5px;
+      }
+
+      /* Stats */
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+      }
+
+      .stat-card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        transition: 0.3s;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .stat-card h3 {
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+
+      .stat-card p {
+        font-size: 24px;
+        font-weight: bold;
+        color: #00eaff;
+      }
+
+      /* Button */
+
+      .analytics-btn {
+        display: inline-block;
+        margin-bottom: 30px;
+        padding: 12px 22px;
+        border-radius: 10px;
+
+        background: linear-gradient(45deg, #00c6ff, #0072ff);
+
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+
+        transition: 0.3s;
+      }
+
+      .analytics-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      /* Chart */
+
+      .chart-section {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 25px;
+        border-radius: 15px;
+        backdrop-filter: blur(12px);
+        margin-bottom: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      }
+
+      .chart-section canvas {
+        max-width: 450px;
+        margin: auto;
+        display: block;
+      }
+
+      /* Tables */
+
+      .table-card {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 25px;
+        border-radius: 15px;
+        backdrop-filter: blur(12px);
+        margin-bottom: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: center;
+      }
+
+      th {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      tr:nth-child(even) {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      tr:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      /* Severity colors */
+
+      .severity-slight {
+        color: #2ecc71;
+        font-weight: bold;
+      }
+
+      .severity-serious {
+        color: #f39c12;
+        font-weight: bold;
+      }
+
+      .severity-fatal {
+        color: #e74c3c;
+        font-weight: bold;
+      }
+
+      /* Footer */
+
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        opacity: 0.7;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- NAVBAR -->
+
+    <div class="navbar">
+      <div style="font-size: 20px; font-weight: bold">
+        🚦 Accident Severity AI
+      </div>
+
+      <div>
+        <a href="/">Home</a>
+        <a href="/dashboard">Model Dashboard</a>
+        <a href="/logout">Logout</a>
+      </div>
+    </div>
+
+    <!-- Branding -->
+
+    <div class="brand">
+      <h1>Admin Dashboard</h1>
+
+      <p>System Monitoring & Prediction Analytics</p>
+    </div>
+
+    <!-- STATS -->
+
+    <div class="stats">
+      <div class="stat-card">
+        <h3>Total Users</h3>
+        <p>{{ total_users }}</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Total Predictions</h3>
+        <p>{{ total_predictions }}</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>System Type</h3>
+        <p>ML Classification</p>
+      </div>
+    </div>
+
+    <center>
+      <a href="/analytics" class="analytics-btn">
+        📊 Open AI Analytics Dashboard
+      </a>
+    </center>
+
+    <!-- CHART -->
+
+    <div class="chart-section">
+      <h2 style="text-align: center; margin-bottom: 20px">
+        Accident Severity Distribution
+      </h2>
+
+      <canvas id="severityChart"></canvas>
+    </div>
+
+    <script>
+
+      const severityLabels = {{ severity_labels | tojson }};
+      const severityValues = {{ severity_values | tojson }};
+
+      const ctx = document.getElementById("severityChart");
+
+      new Chart(ctx,{
+
+      type:"pie",
+
+      data:{
+
+      labels:severityLabels,
+
+      datasets:[{
+
+      data:severityValues,
+
+      backgroundColor:[
+      "#2ecc71",
+      "#f39c12",
+      "#e74c3c"
+      ]
+
+      }]
+
+      },
+
+      options:{
+      plugins:{
+      legend:{
+      labels:{
+      color:"white"
+      }
+      }
+      }
+      }
+
+      });
+    </script>
+
+    <!-- USERS TABLE -->
+
+    <div class="table-card">
+      <h2>👥 Users</h2>
+
+      <table>
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Admin</th>
+        </tr>
+
+        {% if users %} {% for u in users %}
+
+        <tr>
+          <td>{{ u.id }}</td>
+
+          <td>{{ u.username }}</td>
+
+          <td>{{ "Yes" if u.is_admin else "No" }}</td>
+        </tr>
+
+        {% endfor %} {% else %}
+
+        <tr>
+          <td colspan="3">No users found</td>
+        </tr>
+
+        {% endif %}
+      </table>
+    </div>
+
+    <!-- PREDICTIONS TABLE -->
+
+    <div class="table-card">
+      <h2>📊 All Predictions</h2>
+
+      <table>
+        <tr>
+          <th>User ID</th>
+          <th>Severity</th>
+          <th>Confidence</th>
+          <th>Day</th>
+          <th>Weather</th>
+        </tr>
+
+        {% if predictions %} {% for p in predictions %}
+
+        <tr>
+          <td>{{ p.user_id }}</td>
+
+          <td
+            class="{% if 'fatal' in p.severity|lower %}severity-fatal {% elif 'serious' in p.severity|lower %}severity-serious {% else %}severity-slight {% endif %}"
+          >
+            {{ p.severity }}
+          </td>
+
+          <td>{{ p.confidence|round(2) }}%</td>
+
+          <td>{{ p.day }}</td>
+
+          <td>{{ p.weather }}</td>
+        </tr>
+
+        {% endfor %} {% else %}
+
+        <tr>
+          <td colspan="5">No predictions yet</td>
+        </tr>
+
+        {% endif %}
+      </table>
+    </div>
+
+    <div class="footer">
+      © 2026 Accident Severity AI | Built with Flask & Machine Learning
+    </div>
+  </body>
+</html>

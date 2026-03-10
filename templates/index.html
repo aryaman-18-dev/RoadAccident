@@ -1,0 +1,460 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Accident Severity AI</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        min-height: 100vh;
+        color: white;
+      }
+
+      /* NAVBAR */
+
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 40px;
+        background: rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(10px);
+      }
+
+      .logo {
+        font-size: 22px;
+        font-weight: bold;
+      }
+
+      nav {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      nav a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: 0.3s;
+      }
+
+      nav a:hover {
+        color: #00eaff;
+      }
+
+      .user {
+        opacity: 0.8;
+      }
+
+      /* CONTAINER */
+
+      .container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        padding: 40px 8%;
+      }
+
+      /* CARD */
+
+      .card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(15px);
+        padding: 30px;
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      }
+
+      /* FORM */
+
+      form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin-top: 20px;
+      }
+
+      /* INPUT */
+
+      select {
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        outline: none;
+      }
+
+      select option {
+        color: black;
+      }
+
+      /* BUTTON */
+
+      button {
+        grid-column: span 2;
+        padding: 13px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(45deg, #00c6ff, #0072ff);
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      }
+
+      /* RESULT */
+
+      .result-card {
+        text-align: center;
+      }
+
+      .prediction-box {
+        margin: 20px auto;
+        padding: 18px;
+        font-size: 22px;
+        font-weight: bold;
+        border-radius: 12px;
+        width: 70%;
+      }
+
+      /* severity colors */
+
+      .slight {
+        background: #2ecc71;
+      }
+      .serious {
+        background: #f39c12;
+      }
+      .fatal {
+        background: #e74c3c;
+      }
+
+      .gauge-container {
+        width: 260px;
+        margin: 20px auto;
+      }
+
+      .prob-container {
+        margin-top: 30px;
+      }
+
+      .history-btn {
+        display: inline-block;
+        margin-top: 25px;
+        padding: 10px 18px;
+        background: #00c6ff;
+        border-radius: 8px;
+        color: white;
+        text-decoration: none;
+      }
+
+      .footer {
+        text-align: center;
+        padding: 25px;
+        margin-top: 30px;
+        opacity: 0.7;
+      }
+
+      /* MOBILE */
+
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+
+        form {
+          grid-template-columns: 1fr;
+        }
+
+        button {
+          grid-column: span 1;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="navbar">
+      <div class="logo">🚦 Accident Severity AI</div>
+
+      <nav>
+        <a href="/">Home</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/history">History</a>
+        <a href="/my_analytics">📊 My Analytics</a>
+
+        {% if current_user.is_admin %}
+        <a href="/admin">Admin</a>
+        {% endif %}
+
+        <a href="/logout">Logout</a>
+
+        <span class="user">👤 {{ current_user.username }}</span>
+      </nav>
+    </header>
+
+    <div class="container">
+      <!-- FORM -->
+
+      <div class="card">
+        <h2>Predict Accident Severity</h2>
+
+        {% if error %}
+        <div>{{ error }}</div>
+        {% endif %}
+
+        <form action="/predict" method="POST">
+          <select name="Day_of_Week" required>
+            <option disabled selected>Day</option>
+            <option value="1">Sunday</option>
+            <option value="2">Monday</option>
+            <option value="3">Tuesday</option>
+            <option value="4">Wednesday</option>
+            <option value="5">Thursday</option>
+            <option value="6">Friday</option>
+            <option value="7">Saturday</option>
+          </select>
+
+          <select name="Light_Conditions" required>
+            <option disabled selected>Light</option>
+            <option value="1">Daylight</option>
+            <option value="4">Dark Lighted</option>
+            <option value="5">Dark No Light</option>
+          </select>
+
+          <select name="Weather_Conditions" required>
+            <option disabled selected>Weather</option>
+            <option value="1">Fine</option>
+            <option value="2">Rain</option>
+            <option value="3">Snow</option>
+            <option value="4">Fog</option>
+          </select>
+
+          <select name="Road_Surface_Conditions" required>
+            <option disabled selected>Road</option>
+            <option value="1">Dry</option>
+            <option value="2">Wet</option>
+            <option value="3">Snow</option>
+          </select>
+
+          <select name="Urban_or_Rural_Area" required>
+            <option disabled selected>Area</option>
+            <option value="1">Urban</option>
+            <option value="2">Rural</option>
+          </select>
+
+          <select name="Speed_limit" required>
+            <option disabled selected>Speed</option>
+            <option>20</option>
+            <option>30</option>
+            <option>40</option>
+            <option>50</option>
+            <option>60</option>
+            <option>70</option>
+          </select>
+
+          <select name="Road_Type" required>
+            <option disabled selected>Road Type</option>
+            <option value="1">Roundabout</option>
+            <option value="2">One Way</option>
+            <option value="3">Dual</option>
+            <option value="6">Single</option>
+          </select>
+
+          <select name="Junction_Control" required>
+            <option disabled selected>Junction</option>
+            <option value="0">None</option>
+            <option value="2">Signal</option>
+            <option value="3">Stop</option>
+            <option value="4">Give Way</option>
+          </select>
+
+          <select name="Vehicle_Type" required>
+            <option disabled selected>Vehicle</option>
+            <option value="9">Car</option>
+            <option value="19">Motorcycle</option>
+            <option value="20">Bus</option>
+          </select>
+
+          <select name="Sex_of_Driver" required>
+            <option disabled selected>Driver</option>
+            <option value="1">Male</option>
+            <option value="2">Female</option>
+          </select>
+
+          <select name="Age_of_Vehicle" required>
+            <option disabled selected>Vehicle Age</option>
+            <option>1</option>
+            <option>3</option>
+            <option>5</option>
+            <option>8</option>
+            <option>12</option>
+          </select>
+
+          <select name="Number_of_Vehicles" required>
+            <option disabled selected>Vehicles</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+          </select>
+
+          <select name="Number_of_Casualties" required>
+            <option disabled selected>Casualties</option>
+            <option>0</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+          </select>
+
+          <button type="submit">Predict Severity</button>
+        </form>
+      </div>
+
+      <!-- RESULT -->
+
+      <div class="card result-card">
+        {% if prediction_text %}
+
+        <h2>Prediction Result</h2>
+
+        <div class="prediction-box {{ prediction_text|lower }}">
+          {{ prediction_text }}
+        </div>
+
+        <h3>Confidence: {{ "%.2f"|format(confidence) }}%</h3>
+
+        <div class="gauge-container">
+          <canvas id="gaugeChart"></canvas>
+        </div>
+
+        <div class="prob-container">
+          <canvas id="probChart"></canvas>
+        </div>
+
+        <a href="/history" class="history-btn">View Prediction History</a>
+
+        {% else %}
+
+        <h2>Prediction will appear here</h2>
+
+        {% endif %}
+      </div>
+    </div>
+
+    <footer class="footer">© 2026 Accident Severity Prediction System</footer>
+
+    {% if prediction_text %}
+
+    <script>
+
+      var confidence = {{ confidence }};
+      var probabilities = {{ probabilities | tojson }};
+
+      /* NORMALIZE PROBABILITIES */
+
+      var slight = 0;
+      var serious = 0;
+      var fatal = 0;
+
+      for (const key in probabilities) {
+
+      const k = key.toLowerCase();
+
+      if(k === "slight") slight = probabilities[key];
+      if(k === "serious") serious = probabilities[key];
+      if(k === "fatal") fatal = probabilities[key];
+
+      }
+
+
+      /* CONFIDENCE GAUGE */
+
+      new Chart(document.getElementById("gaugeChart"),{
+
+      type:"doughnut",
+
+      data:{
+      datasets:[{
+      data:[confidence,100-confidence],
+      backgroundColor:["#00eaff","rgba(255,255,255,0.1)"],
+      borderWidth:0
+      }]
+      },
+
+      options:{
+      cutout:"75%",
+      plugins:{legend:{display:false}}
+      }
+
+      });
+
+
+      /* PROBABILITY BAR CHART */
+
+      new Chart(document.getElementById("probChart"),{
+
+      type:"bar",
+
+      data:{
+      labels:["Slight","Serious","Fatal"],
+
+      datasets:[{
+
+      label:"Severity Probability",
+
+      data:[slight,serious,fatal],
+
+      backgroundColor:[
+      "#2ecc71",
+      "#f39c12",
+      "#e74c3c"
+      ],
+
+      borderRadius:8
+
+      }]
+      },
+
+      options:{
+      plugins:{
+      legend:{labels:{color:"white"}}
+      },
+      scales:{
+      x:{
+      ticks:{color:"white"},
+      grid:{color:"rgba(255,255,255,0.1)"}
+      },
+      y:{
+      beginAtZero:true,
+      max:100,
+      ticks:{color:"white"},
+      grid:{color:"rgba(255,255,255,0.1)"}
+      }
+      }
+      }
+
+      });
+    </script>
+
+    {% endif %}
+  </body>
+</html>

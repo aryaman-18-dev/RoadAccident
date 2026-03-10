@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+  <head>
+    <title>My Accident Risk Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <style>
+      body {
+        font-family: Arial;
+        background: #0f172a;
+        color: white;
+        margin: 0;
+      }
+
+      /* HEADER */
+      header {
+        background: #020617;
+        padding: 20px;
+        text-align: center;
+      }
+
+      nav a {
+        color: white;
+        margin: 0 15px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      nav a:hover {
+        color: #22c55e;
+      }
+
+      /* PAGE */
+      .container {
+        text-align: center;
+        padding: 40px;
+      }
+
+      h1 {
+        margin-bottom: 10px;
+      }
+
+      .dashboard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 30px;
+      }
+
+      .chart-card {
+        background: #1e293b;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      }
+
+      canvas {
+        max-width: 100%;
+      }
+
+      /* FOOTER */
+      footer {
+        background: #020617;
+        text-align: center;
+        padding: 15px;
+        margin-top: 40px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h2>🚦 AI Road Accident Risk Predictor</h2>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/history">History</a>
+        <a href="/my_analytics">My Analytics</a>
+      </nav>
+    </header>
+
+    <div class="container">
+      <h1>📊 User Analytics Dashboard</h1>
+      <p>Insights from your prediction history</p>
+
+      <div class="dashboard">
+        <!-- Bar Chart -->
+        <div class="chart-card">
+          <h3>Risk Distribution</h3>
+          <canvas id="riskChart"></canvas>
+        </div>
+
+        <!-- Pie Chart -->
+        <div class="chart-card">
+          <h3>Severity Percentages</h3>
+          <canvas id="severityChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Data from Flask
+      var risks = {{ risks | tojson | default('[]') }};
+
+      // Count each risk type
+      var high = 0, medium = 0, low = 0;
+      for (let r of risks){
+          if(r == "High") high++;
+          else if(r == "Medium") medium++;
+          else low++;
+      }
+
+      // ---------- BAR CHART ----------
+      new Chart(document.getElementById("riskChart"), {
+          type: "bar",
+          data: {
+              labels: ["High Risk", "Medium Risk", "Low Risk"],
+              datasets: [{
+                  label: "Predictions",
+                  data: [high, medium, low],
+                  backgroundColor: ["#dc2626","#f59e0b","#16a34a"],
+                  borderRadius: 8
+              }]
+          },
+          options: {
+              responsive: true,
+              plugins: {
+                  legend: { display: false },
+                  tooltip: { callbacks: { label: ctx => ctx.parsed.y + " predictions" } },
+                  datalabels: { color: 'white', font: { weight: 'bold', size: 14 } }
+              },
+              scales: {
+                  x: { ticks: { color: "white" }, grid: { color: "rgba(255,255,255,0.1)" } },
+                  y: { beginAtZero: true, ticks: { color: "white", stepSize: 1 }, grid: { color: "rgba(255,255,255,0.2)" } }
+              }
+          },
+          plugins: [ChartDataLabels]
+      });
+
+      // ---------- PIE CHART ----------
+      new Chart(document.getElementById("severityChart"), {
+          type: "pie",
+          data: {
+              labels: ["High", "Medium", "Low"],
+              datasets: [{
+                  data: [high, medium, low],
+                  backgroundColor: ["#dc2626","#f59e0b","#16a34a"]
+              }]
+          },
+          options: {
+              responsive: true,
+              plugins: {
+                  legend: { labels: { color: "white", font: { size: 14, weight: 'bold' } } },
+                  datalabels: { color: 'white', font: { weight: 'bold', size: 14 }, formatter: (value, ctx) => value }
+              }
+          },
+          plugins: [ChartDataLabels]
+      });
+    </script>
+
+    <footer>
+      <p>© 2026 AI Road Accident Predictor</p>
+    </footer>
+  </body>
+</html>

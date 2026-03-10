@@ -1,0 +1,309 @@
+<!doctype html>
+<html>
+<head>
+
+<title>Model Dashboard | Accident Severity AI</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:"Segoe UI",sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+color:white;
+min-height:100vh;
+}
+
+/* NAVBAR */
+
+.navbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:18px 40px;
+background:rgba(0,0,0,0.4);
+backdrop-filter:blur(10px);
+}
+
+.logo{
+font-size:22px;
+font-weight:bold;
+}
+
+nav a{
+margin-left:25px;
+color:white;
+text-decoration:none;
+font-weight:500;
+transition:.3s;
+}
+
+nav a:hover{
+color:#00eaff;
+}
+
+/* MAIN */
+
+.dashboard-container{
+padding:40px 8%;
+}
+
+.dashboard-container h1{
+margin-bottom:30px;
+text-align:center;
+}
+
+/* STATS */
+
+.stats-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:25px;
+margin-bottom:40px;
+}
+
+.stat-card{
+background:rgba(255,255,255,0.08);
+padding:25px;
+border-radius:15px;
+text-align:center;
+backdrop-filter:blur(12px);
+transition:.3s;
+box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+
+.stat-card:hover{
+transform:translateY(-5px);
+}
+
+.stat-card h3{
+margin-bottom:10px;
+font-size:18px;
+}
+
+.stat-card p{
+font-size:20px;
+font-weight:bold;
+color:#00eaff;
+}
+
+/* CHART */
+
+.chart-section{
+margin-top:40px;
+background:rgba(255,255,255,0.06);
+padding:25px;
+border-radius:15px;
+backdrop-filter:blur(10px);
+box-shadow:0 10px 25px rgba(0,0,0,0.3);
+}
+
+.chart-section h2{
+margin-bottom:20px;
+}
+
+.chart-img{
+width:100%;
+border-radius:10px;
+margin-top:10px;
+}
+
+/* TABLE */
+
+.comparison-table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+.comparison-table th,
+.comparison-table td{
+padding:12px;
+text-align:center;
+}
+
+.comparison-table th{
+background:rgba(255,255,255,0.15);
+}
+
+.comparison-table tr:nth-child(even){
+background:rgba(255,255,255,0.05);
+}
+
+/* CONFUSION MATRICES */
+
+.confusion-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+margin-top:15px;
+}
+
+.confusion-grid img{
+width:100%;
+border-radius:10px;
+background:white;
+padding:10px;
+}
+
+/* FOOTER */
+
+.footer{
+margin-top:50px;
+text-align:center;
+padding:20px;
+background:rgba(0,0,0,0.4);
+font-size:14px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header class="navbar">
+
+<div class="logo">🚦 Accident Severity AI</div>
+
+<nav>
+<a href="/">Home</a>
+<a href="/dashboard">Dashboard</a>
+</nav>
+
+</header>
+
+
+<div class="dashboard-container">
+
+<h1>📊 Model Analytics Dashboard</h1>
+
+<!-- STATS -->
+
+<div class="stats-grid">
+
+<div class="stat-card">
+<h3>🏆 Best Model</h3>
+
+<p>
+{% if results %}
+{{ best_model }}
+{% else %}
+N/A
+{% endif %}
+</p>
+
+</div>
+
+<div class="stat-card">
+<h3>🧠 Algorithm</h3>
+<p>Supervised ML</p>
+</div>
+
+<div class="stat-card">
+<h3>🎯 Target</h3>
+<p>Accident Severity</p>
+</div>
+
+</div>
+
+
+<!-- ACCURACY CHART -->
+
+<div class="chart-section">
+
+<h2>📈 Model Accuracy Comparison</h2>
+
+<img
+src="{{ url_for('static', filename='model_accuracy.png') }}"
+class="chart-img"
+/>
+
+</div>
+
+
+<!-- ACCURACY TABLE -->
+
+<div class="chart-section">
+
+<h2>📋 Accuracy Table</h2>
+
+<table class="comparison-table">
+
+<tr>
+<th>Model</th>
+<th>Accuracy</th>
+<th>Weighted F1</th>
+</tr>
+
+{% for model,data in results.items() %}
+
+<tr>
+
+<td>{{ model }}</td>
+
+<td>{{ (data.accuracy*100)|round(2) }}%</td>
+
+<td>{{ (data.weighted_f1*100)|round(2) }}%</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+
+<!-- FEATURE IMPORTANCE -->
+
+{% if feature_plot_available %}
+
+<div class="chart-section">
+
+<h2>⭐ Feature Importance</h2>
+
+<img
+src="{{ url_for('static', filename='feature_importance.png') }}"
+class="chart-img"
+/>
+
+</div>
+
+{% endif %}
+
+
+<!-- CONFUSION MATRICES -->
+
+<div class="chart-section">
+
+<h2>🔍 Confusion Matrices</h2>
+
+<div class="confusion-grid">
+
+<img src="{{ url_for('static', filename='Logistic_Regression_cm.png') }}">
+
+<img src="{{ url_for('static', filename='Random_Forest_cm.png') }}">
+
+<img src="{{ url_for('static', filename='XGBoost_cm.png') }}">
+
+</div>
+
+</div>
+
+</div>
+
+
+<footer class="footer">
+<p>© 2026 Accident Severity Prediction System</p>
+</footer>
+
+</body>
+</html>
