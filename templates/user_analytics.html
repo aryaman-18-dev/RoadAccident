@@ -104,9 +104,17 @@
       // Count each risk type
       var high = 0, medium = 0, low = 0;
       for (let r of risks){
-          if(r == "High") high++;
-          else if(r == "Medium") medium++;
-          else low++;
+        r = r.toLowerCase();
+
+        if(r === "fatal"){
+          high++;
+        }
+        else if(r === "serious"){
+          medium++;
+        }
+        else{
+          low++;
+        }
       }
 
       // ---------- BAR CHART ----------
@@ -161,4 +169,5 @@
       <p>© 2026 AI Road Accident Predictor</p>
     </footer>
   </body>
+
 </html>
