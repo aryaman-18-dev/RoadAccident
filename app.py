@@ -169,12 +169,36 @@ def admin():
 # ==============================
 # HISTORY
 # ==============================
-
 @app.route("/history")
 @login_required
 def history():
 
     predictions = Prediction.query.filter_by(user_id=current_user.id).all()
+
+    # Day Mapping
+    DAY_MAP = {
+        1: "Sunday",
+        2: "Monday",
+        3: "Tuesday",
+        4: "Wednesday",
+        5: "Thursday",
+        6: "Friday",
+        7: "Saturday"
+    }
+
+    # Weather Mapping
+    WEATHER_MAP = {
+        1: "Fine",
+        2: "Rain",
+        3: "Snow", 
+        4: "Fog or Mist",
+        5: "Other"
+    }
+
+    # Convert numbers → labels
+    for p in predictions:
+        p.day = DAY_MAP.get(int(p.day), p.day)
+        p.weather = WEATHER_MAP.get(int(p.weather), p.weather)
 
     return render_template("history.html", predictions=predictions)
 
